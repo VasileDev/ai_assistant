@@ -8,7 +8,7 @@ def load_pdf(pdf_name: str) -> list[str]:
         pdf_text = []
 
         for canvas in viewer:
-            content = " ".join(canvas.strings)
+            content = "".join(canvas.strings)
             pdf_text.append(content)
 
     return pdf_text
