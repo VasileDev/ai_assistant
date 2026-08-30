@@ -29,6 +29,9 @@ def chunking_pages(
                     "page": page_number
                 })
 
+            if end >= len(page_text):
+                break
+
             start = end - overlap
 
     return chunks

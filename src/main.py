@@ -1,12 +1,14 @@
-from ingestion.document_loader import load_pdf
-from ingestion.text_splitter import chunking_pages
+# currently a testing ground
+from ingestion.pipeline import ingest_document
 
-pages = load_pdf("../data/documents/About Dacia.pdf")
+chunks = ingest_document("../data/documents/About Dacia.pdf")
 
-chunks = chunking_pages(pages)
+print(f"total chunks:{len(chunks)}")
+print("_"*50)
 
-print("Pages:", len(pages))
-print("Chunks:", len(chunks))
-
-for chunk in chunks:
-    print(chunk, "\n\n")
+for i, chunk in enumerate(chunks, start=1):
+    print(f"Chunk: {i}")
+    print(f"Page: {chunk['page']}")
+    print(f"Length: {len(chunk['text'])} characters")
+    print(f"Text: {chunk['text']}")
+    print("_"*50)
