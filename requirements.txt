@@ -1,3 +1,2 @@
 python-dotenv
 pdfreader
-sentence_transformers
