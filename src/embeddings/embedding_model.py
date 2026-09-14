@@ -20,9 +20,4 @@ def embed_chunks(chunks: list[dict])->list[dict]:
                 "embedding": embedding
             })
 
-
-
-
-
-
     return embedded_chunks
