@@ -2,10 +2,12 @@ from sentence_transformers import SentenceTransformer
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
-def create_embedding(text: str)->list[dict]:
+# embed a piece of text 
+def create_embedding(text: str):
     embedding = model.encode(text)
     return embedding
 
+# add the embedding part to the list of vectors with the text from the chunks and the page number
 def embed_chunks(chunks: list[dict])->list[dict]:
 
     embedded_chunks = []

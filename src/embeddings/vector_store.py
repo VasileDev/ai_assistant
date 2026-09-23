@@ -19,6 +19,7 @@ def create_vector_store(embeded_chunks: list[dict]):
 
     return index
 
+# return similar chunks to the user's prompt
 def search_vector_store(
     query: str,
     index,
@@ -39,6 +40,7 @@ def search_vector_store(
     results = []
 
     for i in indices[0]:
-        results.append(embedded_chunks[i])
+        if i >= 0:
+            results.append(embedded_chunks[i])
 
     return results
