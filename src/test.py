@@ -5,6 +5,7 @@ from embeddings.vector_store import (
     # search_vector_store
 )
 from rag.retriever import retrieve_content
+from rag.generator import build_context, build_prompt
 
 
 chunks = ingest_document(
@@ -15,8 +16,10 @@ embedded_chunks = embed_chunks(chunks)
 
 index = create_vector_store(embedded_chunks)
 
+question = "something about dacia"
+
 results = retrieve_content(
-    "When was Dacia founded?",
+    question,
     index,
     embedded_chunks
 )
@@ -27,7 +30,11 @@ results = retrieve_content(
 #     embedded_chunks
 # )
 
-for result in results:
-    print("Page:", result["page"])
-    print(result["text"])
-    print("---------------------")
+# for result in results:
+#     print("Page:", result["page"])
+#     print(result["text"])
+#     print("---------------------")
+
+
+prompt = build_prompt(question, results)
+print(prompt)
