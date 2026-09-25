@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+from openai import OpenAI
+import os
+
 def build_context(retrieved_chunks:list[dict])->str:
     context_parts = []
     for chunk in retrieved_chunks:
@@ -31,20 +35,26 @@ Mention the page number used to answer the question.
 """
     return prompt.strip()
 
+# Calling OpenAi API
+def call_llm(prompt:str)->str:
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
 
+    client = OpenAI(api_key=api_key)
 
-# Needs inmplementation !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-def call_llm()
-    pass
+    response = client.responses.create(
+        model="gpt-4.1-nano",
+        input=prompt,
+        max_output_tokens=150
+    )
 
+    return response.output_text
 
 def generate_answer(
     question: str,
     retrieved_chunks: list[dict],
 )->str:
     prompt = build_prompt(question, retrieved_chunks)
-
-    # empty for now
-    response = call_llm()
+    response = call_llm(prompt)
 
     return response

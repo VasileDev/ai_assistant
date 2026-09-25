@@ -4,8 +4,9 @@ from embeddings.vector_store import (
     create_vector_store,
     # search_vector_store
 )
-from rag.retriever import retrieve_content
-from rag.generator import build_context, build_prompt
+from rag.retriever import retrieve_context
+from rag.generator import build_context, build_prompt, generate_answer
+from rag.rag_pipeline import answer_question
 
 
 chunks = ingest_document(
@@ -16,9 +17,9 @@ embedded_chunks = embed_chunks(chunks)
 
 index = create_vector_store(embedded_chunks)
 
-question = "something about dacia"
+question = "When was Dacia founded?"
 
-results = retrieve_content(
+results = retrieve_context(
     question,
     index,
     embedded_chunks
@@ -36,5 +37,10 @@ results = retrieve_content(
 #     print("---------------------")
 
 
-prompt = build_prompt(question, results)
-print(prompt)
+# prompt = build_prompt(question, results)
+# print(prompt)
+
+# answer = generate_answer(question, results)
+# print(answer)
+
+print(answer_question(question, index, embedded_chunks))

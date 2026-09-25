@@ -3,3 +3,5 @@ pdfreader
 sentence_transformers
 faiss-cpu
 numpy
+python-dotenv
+openai
