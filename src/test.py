@@ -17,7 +17,7 @@ embedded_chunks = embed_chunks(chunks)
 
 index = create_vector_store(embedded_chunks)
 
-question = "When was Dacia founded?"
+question = "Tell me a Dacia model"
 
 results = retrieve_context(
     question,
