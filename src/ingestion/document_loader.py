@@ -1,24 +1,6 @@
-# Loading the pdf file 
-
-# from pdfreader import SimplePDFViewer
-
 from pypdf import PdfReader
 
-# pdfreader option
-# def load_pdf(pdf_name: str) -> list[str]:
-#     with open(pdf_name, 'rb') as pdf:
-#         viewer = SimplePDFViewer(pdf)
-#         pdf_text = []
-
-#         for canvas in viewer:
-#             content = "".join(canvas.strings)
-#             pdf_text.append(content)
-
-#     return pdf_text
-
-# add pypdf to requirements
-
-# returns a list of strings, each element of the list is a page of the pdf uploaded
+# loads the pdf into the program by creating a list containing each page as an ellement
 def load_pdf(pdf_name:str)->list[str]:
     reader = PdfReader(pdf_name)
     content_of_document = []
@@ -28,4 +10,3 @@ def load_pdf(pdf_name:str)->list[str]:
         content_of_document.append(text)
 
     return content_of_document
-    

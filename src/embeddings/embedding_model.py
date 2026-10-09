@@ -25,7 +25,7 @@ def embed_chunks(chunks: list[dict], batch_size: int = 32) -> list[dict]:
     embeddings = model.encode(
         texts,
         batch_size=batch_size,
-        show_progress_bar=len(texts) > 100
+        show_progress_bar=len(texts) > 100 # idk why did claude added this
     )
 
     # 3. attach each embedding back to its chunk (same order)
@@ -34,7 +34,8 @@ def embed_chunks(chunks: list[dict], batch_size: int = 32) -> list[dict]:
         embedded_chunks.append({
             "text": chunks[i]["text"],
             "page": chunks[i]["page"],
-            "embedding": embeddings[i]
+            "embedding": embeddings[i],
+            "document_name": chunks[i]["document_name"]
         })
 
     return embedded_chunks

@@ -6,9 +6,9 @@ import os
 from embeddings.embedding_model import create_embedding
 
 def create_vector_store(embeded_chunks: list[dict]):
-    embeddings = [chunk["embedding"] for chunk in embeded_chunks] 
+    embeddings = [chunk["embedding"] for chunk in embeded_chunks] # create a new list with only the embeddings from the list with dicts
 
-    embeddings = np.array(embeddings).astype("float32")
+    embeddings = np.array(embeddings).astype("float32") # turn the list of embeddings into a numpy list
 
     # Normalize vectors so Inner Product ~= cosine similarity GPT SUGGESTION
     faiss.normalize_L2(embeddings)
@@ -56,6 +56,7 @@ def search_vector_store(
         results.append({
             "text": chunk["text"],
             "page": chunk["page"],
+            "document_name": chunk["document_name"],
             "score": score
         })
 
@@ -81,17 +82,17 @@ def save_vector_store(index, embedded_chunks: list[dict], folder: str):
     # 1. save the vectors
     faiss.write_index(index, os.path.join(folder, INDEX_FILE))
 
-    # 2. save only text and page (the vectors are already in the index)
+    # 2. save only text, page and document_name (the vectors are already in the index)
     chunks_to_save = []
     for chunk in embedded_chunks:
         chunks_to_save.append({
             "text": chunk["text"],
-            "page": chunk["page"]
+            "page": chunk["page"],
+            "document_name": chunk["document_name"]
         })
 
     with open(os.path.join(folder, CHUNKS_FILE), "w", encoding="utf-8") as f:
         json.dump(chunks_to_save, f, ensure_ascii=False, indent=2)
-
 
 # load the FAISS index and the chunks from disk
 def load_vector_store(folder: str):

@@ -20,7 +20,7 @@ def build_context(retrieved_chunks: list[dict]) -> str:
     context_parts = []
     for chunk in retrieved_chunks:
         context_parts.append(
-            f"[Page {chunk['page']}]\n{chunk['text']}"
+            f"[{chunk["document_name"]} | Page: {chunk['page']}]\n{chunk['text']}"
         )
 
     return "\n\n".join(context_parts)
@@ -46,7 +46,7 @@ Question:
 
 Rules:
 - Answer in at most 3 short sentences.
-- Mention the page number used to answer the question.
+- Mention the document name used alongside the page number used to answer the question.
 - If the answer cannot be found in the context, say exactly:
 "I could not find the answer in the provided document."
 """

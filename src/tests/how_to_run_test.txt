@@ -1,0 +1,2 @@
+being in the src folder, in the terminal run: python -m tests.test 
+                                          or: python -m tests.test2
