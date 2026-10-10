@@ -1,5 +1,6 @@
 from ingestion.pipeline import ingest_documents
 
+# !! outdated because now we need this list to contain dictionaries that have the path and also the name
 names = ["../data/documents/About Dacia.pdf", "../data/documents/Dacia Duster.pdf"]
 
 chunks = ingest_documents(names)

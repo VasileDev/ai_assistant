@@ -9,7 +9,7 @@ from embeddings.vector_store import (
 from rag.retriever import retrieve_context
 from rag.rag_pipeline import answer_question
 
-
+# !! outdated because now we need this list to contain dictionaries that have the path and also the name
 DOCUMENT_NAMES = ["../data/documents/About Dacia.pdf", "../data/documents/Dacia Duster.pdf"]
 INDEX_FOLDER = "../data/index"
 
