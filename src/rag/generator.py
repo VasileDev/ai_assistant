@@ -1,26 +1,51 @@
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, OpenAIError
+import logging
 import os
 
-# Load the API key and create the OpenAI client only once, when the file is imported
 load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
 
-if not api_key:
-    raise ValueError("OPENAI_API_KEY is missing. Add it to your .env file.")
-
-client = OpenAI(api_key=api_key)
+logger = logging.getLogger(__name__)
 
 MODEL_NAME = "gpt-4.1-nano"
 MAX_OUTPUT_TOKENS = 300
+REQUEST_TIMEOUT_SECONDS = 30
+
+# the OpenAI client is created the first time it is needed, not when the file is imported
+# this way the app can start even without a .env file (it only fails when a question is asked)
+client = None
 
 
-# Join the retrieved chunks into one context string, each marked with its page number
+# our own error for every problem with the LLM (missing key, timeout, OpenAI down)
+# its message is safe to show to the user: no API key, no internal details
+class LLMError(Exception):
+    pass
+
+
+# creates the OpenAI client on the first call, then reuses the same one
+def get_client() -> OpenAI:
+    global client  # we want to change the "client" variable from the top of the file
+
+    if client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise LLMError("The AI service is not configured. OPENAI_API_KEY is missing from the .env file.")
+
+        client = OpenAI(
+            api_key=api_key,
+            timeout=REQUEST_TIMEOUT_SECONDS,
+            max_retries=1
+        )
+
+    return client
+
+
+# Join the retrieved chunks into one context string, each marked with its document and page
 def build_context(retrieved_chunks: list[dict]) -> str:
     context_parts = []
     for chunk in retrieved_chunks:
         context_parts.append(
-            f"[{chunk["document_name"]} | Page: {chunk['page']}]\n{chunk['text']}"
+            f"[{chunk['document_name']} | Page: {chunk['page']}]\n{chunk['text']}"
         )
 
     return "\n\n".join(context_parts)
@@ -55,11 +80,18 @@ Rules:
 
 # Calling the OpenAI API
 def call_llm(prompt: str) -> str:
-    response = client.responses.create(
-        model=MODEL_NAME,
-        input=prompt,
-        max_output_tokens=MAX_OUTPUT_TOKENS
-    )
+    openai_client = get_client()
+
+    try:
+        response = openai_client.responses.create(
+            model=MODEL_NAME,
+            input=prompt,
+            max_output_tokens=MAX_OUTPUT_TOKENS
+        )
+    except OpenAIError as error:
+        # the full error goes only in the server log, the user gets a short message
+        logger.error("OpenAI request failed: %s", error)
+        raise LLMError("The AI service is not available right now. Please try again.")
 
     return response.output_text
 

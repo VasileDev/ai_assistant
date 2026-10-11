@@ -1,5 +1,6 @@
 from sentence_transformers import SentenceTransformer
 
+# the model is loaded once, when the file is imported
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 
@@ -10,6 +11,7 @@ def create_embedding(text: str):
 
 
 # embed all chunks at once, in batches
+# every chunk keeps its fields (text, page, document_name, document_id) and gets an extra "embedding" field
 def embed_chunks(chunks: list[dict], batch_size: int = 32) -> list[dict]:
 
     # if the document has no text, return an empty list
@@ -25,7 +27,7 @@ def embed_chunks(chunks: list[dict], batch_size: int = 32) -> list[dict]:
     embeddings = model.encode(
         texts,
         batch_size=batch_size,
-        show_progress_bar=len(texts) > 100 # idk why did claude added this
+        show_progress_bar=len(texts) > 100  # progress bar in the terminal only for big uploads
     )
 
     # 3. attach each embedding back to its chunk (same order)
@@ -34,8 +36,9 @@ def embed_chunks(chunks: list[dict], batch_size: int = 32) -> list[dict]:
         embedded_chunks.append({
             "text": chunks[i]["text"],
             "page": chunks[i]["page"],
-            "embedding": embeddings[i],
-            "document_name": chunks[i]["document_name"]
+            "document_name": chunks[i]["document_name"],
+            "document_id": chunks[i]["document_id"],
+            "embedding": embeddings[i]
         })
 
     return embedded_chunks
