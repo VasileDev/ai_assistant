@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Document Assistant</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #17212b; background: #f3f6f8; }
+    body { max-width: 820px; margin: 40px auto; padding: 0 18px; }
+    main { background: white; padding: 28px; border-radius: 14px; box-shadow: 0 6px 24px #10203012; }
+    h1 { margin-top: 0; } section { border-top: 1px solid #e2e8ed; margin-top: 24px; padding-top: 20px; }
+    label { display: block; font-weight: 650; margin: 14px 0 8px; }
+    input[type=file], textarea { width: 100%; box-sizing: border-box; }
+    textarea { min-height: 90px; padding: 10px; font: inherit; }
+    button { margin-top: 12px; padding: 10px 18px; border: 0; border-radius: 8px; color: white; background: #1769aa; font: inherit; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .status { min-height: 1.5em; color: #475569; white-space: pre-wrap; }
+    .error { color: #b42318; } .source { border-left: 3px solid #8ab4d6; padding: 8px 12px; margin: 10px 0; background: #f7fafc; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Document Assistant</h1>
+  <p>Upload up to 10 text-based PDF files, then ask a question about them.</p>
+  <section>
+    <h2>1. Upload documents</h2>
+    <form id="upload-form">
+      <label for="files">PDF documents</label>
+      <input id="files" name="files" type="file" accept="application/pdf,.pdf" multiple required>
+      <button id="upload-button" type="submit">Upload and index</button>
+      <p id="upload-status" class="status" role="status"></p>
+    </form>
+  </section>
+  <section>
+    <h2>2. Ask a question</h2>
+    <form id="question-form">
+      <label for="question">Question</label>
+      <textarea id="question" required placeholder="Ask something from your documents"></textarea>
+      <button id="question-button" type="submit">Ask</button>
+      <p id="question-status" class="status" role="status"></p>
+    </form>
+    <div id="answer" aria-live="polite"></div>
+  </section>
+</main>
+<script>
+const uploadForm = document.querySelector("#upload-form");
+const questionForm = document.querySelector("#question-form");
+const uploadStatus = document.querySelector("#upload-status");
+const questionStatus = document.querySelector("#question-status");
+const answerBox = document.querySelector("#answer");
+
+async function readResponse(response) {
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.detail || "Request failed.");
+  return data;
+}
+
+uploadForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const files = document.querySelector("#files").files;
+  if (!files.length) return;
+  const form = new FormData();
+  for (const file of files) form.append("files", file);
+  const button = document.querySelector("#upload-button");
+  button.disabled = true;
+  uploadStatus.className = "status";
+  uploadStatus.textContent = "Processing documents...";
+  answerBox.replaceChildren();
+  try {
+    const result = await readResponse(await fetch("/documents", { method: "POST", body: form }));
+    uploadStatus.textContent = `Ready: ${result.documents_count} documents, ${result.chunks_count} text chunks.`;
+  } catch (error) {
+    uploadStatus.className = "status error";
+    uploadStatus.textContent = error.message;
+  } finally { button.disabled = false; }
+});
+
+questionForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = document.querySelector("#question-button");
+  button.disabled = true;
+  questionStatus.className = "status";
+  questionStatus.textContent = "Thinking...";
+  answerBox.replaceChildren();
+  try {
+    const result = await readResponse(await fetch("/questions", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: document.querySelector("#question").value })
+    }));
+    const answer = document.createElement("p");
+    answer.textContent = result.answer;
+    answerBox.append(answer);
+    for (const source of result.sources || []) {
+      const item = document.createElement("div");
+      item.className = "source";
+      const title = document.createElement("strong");
+      title.textContent = `${source.document_name} — page ${source.page}`;
+      const text = document.createElement("p");
+      text.textContent = source.text;
+      item.append(title, text);
+      answerBox.append(item);
+    }
+    questionStatus.textContent = "";
+  } catch (error) {
+    questionStatus.className = "status error";
+    questionStatus.textContent = error.message;
+  } finally { button.disabled = false; }
+});
+</script>
+</body>
+</html>

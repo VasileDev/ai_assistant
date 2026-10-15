@@ -3,6 +3,6 @@ pypdf
 sentence_transformers
 faiss-cpu
 numpy
-python-dotenv
 openai
 fastapi[standard]
+pytest

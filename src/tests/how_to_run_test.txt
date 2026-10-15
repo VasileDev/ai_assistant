@@ -1,2 +1,1 @@
-being in the src folder, in the terminal run: python -m tests.test 
-                                          or: python -m tests.test2
+From the repository root, run: python -m pytest src/tests -q
